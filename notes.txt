@@ -1,0 +1,12 @@
+two main types of instruction
+
+A instructions
+
+C instructions
+
+dest = comp;jump 
+dest is optional
+jump is optional
+
+also keep track of:
+- comments
