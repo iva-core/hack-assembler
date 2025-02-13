@@ -1,4 +1,4 @@
-def assemble_c_instruction(data):
+def assemble_c_instruction(data: str) -> int: # takes in string and returns int
     # dest = comp;jump
     # first check if there's a dest
     line = data.split('=')
@@ -23,19 +23,18 @@ def assemble_c_instruction(data):
                 dest_bin = 0b111
             case _:
                 raise Exception(f'{dest} is not a valid destination. ')
-        print(dest_bin)
-        # print(line)
+        dest_bin <<= 3 # bit shift left 3
     else:
-        print('no dest')
+        line = line[0]
+        dest_bin = 0
 
     # next look at jump
+    # print(line)
     line = line.split(';')
     if len(line) == 2:
         # we have jump
         jump = line[1]
         line = line[0]
-        print(jump)
-        # print(line)
         match jump:
             case 'JGT':
                 jump_bin = 0b001
@@ -53,11 +52,9 @@ def assemble_c_instruction(data):
                 jump_bin = 0b111
             case _:
                 raise Exception(f'{jump} is not a valid jump. ')
-        print(jump_bin)
-        print(f'Line left: {line}')
     else:
-        print('no jump')
-        print(f'Line left: {line}')
+        line = line[0]
+        jump_bin = 0
 
     # now look at computation
     match line:
@@ -112,27 +109,31 @@ def assemble_c_instruction(data):
         case 'D&M':
             comp_bin = 0b1000000
         case 'D|M':
-            comp_bin = 0b1010101
+            comp_bin = 0b1010101 
         case _:
             raise Exception(f'{line} is not a valid computation. ')
-    print(comp_bin)
+    comp_bin <<= 6 # bit shift left 6
 
     # combine
-    # c_instr = dest_bin + comp_bin + jump_bin
+    instr = 0b000000000000000
+    instr |= jump_bin
+    instr |= dest_bin
+    instr |= comp_bin
+    instr |= 0b111_0000000_000_000
+    return instr
     
-def assemble_a_instruction(data):
-    # don't think about the exceptions rn
-    # just do @number = number
-    if data.startswith('@'):
-        line = data.split('@')
-        loc = line[1]
-        if loc.isdigit():
-            # annoying formatting stuff 
-            instr = bin(int(loc))
-            instr = instr[2:].zfill(15)
-            instr = f'0b{instr}'
-        print(instr)
-    pass
+
+def assemble_a_instruction(data: str) -> int:
+    line = data.split('@')
+    loc = line[1]
+    if loc.isdigit():
+        if int(loc) > 2**15:
+            raise Exception(f'{loc} is greater than 2^15')
+        instr = int(loc)
+    else:
+        my_num = symbol_table[loc]
+        instr = my_num
+    return instr
 
 # symbol table which we will add to in one of the parses
 symbol_table  = {'R0': 0, 'R1': 1, 'R2': 2, 'R3': 3, 'R4': 4, 'R5': 5, 
@@ -142,19 +143,40 @@ symbol_table  = {'R0': 0, 'R1': 1, 'R2': 2, 'R3': 3, 'R4': 4, 'R5': 5,
 
 line_count = 0
 
-example = 'M=D|M;JMP#@5#@20#0;JMP#//hello' # split by # for now
+to_assemble = []
+with open('test.asm', 'r') as my_file:
+    to_assemble = [x.strip() for x in (my_file.readlines())]
 
-my_list = example.split('#')
-# print(my_list)
+print(to_assemble)
 
-for x in my_list:
+for x in to_assemble:
     if x.startswith('//'):
         continue # comments aren't included in line count
     else:
-        line_count += 1
-print(line_count)
+        if x.startswith('('):
+            if x.endswith(')'):
+                label = x[1:-1]
+                if label in symbol_table:
+                    raise Exception(f'{label} already exists in table')
+                symbol_table[label] = line_count
+                continue
+    line_count += 1
 
-#assemble_c_instruction('M=D|M;JMP')
-# assemble_c_instruction('M=comp')
-# assemble_c_instruction('comp;jump')
-# assemble_a_instruction('@5')
+for x in to_assemble:
+    current_pos = 16
+    if x.startswith('@'):
+        if (x[1:] not in symbol_table) and (not x[1:].isdigit()):
+            new_symbol = x[1:]
+            symbol_table[new_symbol] = current_pos
+            current_pos += 1
+
+assembled: list[int] = [] # saying it's a list of ints
+
+for x in to_assemble:
+    if x.startswith('@'):
+        assembled.append(assemble_a_instruction(x))
+    elif x.startswith('(') or x.startswith('//'):
+        continue
+    else:
+        assembled.append(assemble_c_instruction(x))
+
