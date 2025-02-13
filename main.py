@@ -128,14 +128,14 @@ def assemble_a_instruction(data: str) -> int:
     loc = line[1]
     if loc.isdigit():
         if int(loc) > 2**15:
-            raise Exception(f'{loc} is greater than 2^15')
+            raise Exception(f'{loc} is greater than 2^15. ')
         instr = int(loc)
     else:
         my_num = symbol_table[loc]
         instr = my_num
     return instr
 
-# symbol table which we will add to in one of the parses
+# symbol table which we add to in one of the parses
 symbol_table  = {'R0': 0, 'R1': 1, 'R2': 2, 'R3': 3, 'R4': 4, 'R5': 5, 
                  'R6': 6, 'R7': 7, 'R8': 8, 'R9': 9, 'R10': 10, 'R11': 11,
                  'R12': 12, 'R13': 13, 'R14': 14, 'R15': 15, 'SCREEN': 16384, 'KBD': 24576}
@@ -157,7 +157,7 @@ for x in to_assemble:
             if x.endswith(')'):
                 label = x[1:-1]
                 if label in symbol_table:
-                    raise Exception(f'{label} already exists in table')
+                    raise Exception(f'{label} already exists in table. ')
                 symbol_table[label] = line_count
                 continue
     line_count += 1
@@ -180,3 +180,11 @@ for x in to_assemble:
     else:
         assembled.append(assemble_c_instruction(x))
 
+open('output.txt', 'w').close() # resetting contents of text file
+
+with open('output.txt', 'a') as output_file:
+    for x in assembled:
+        to_append = bin(x)
+        to_append = to_append[2:].zfill(16)
+        to_append = f'0b{to_append}\n'
+        output_file.write(to_append)
