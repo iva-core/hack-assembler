@@ -10,3 +10,19 @@ jump is optional
 
 also keep track of:
 - comments
+
+
+
+at the end we go over it twice looking for
+labels?
+
+make a dictionary w the labels and locations or smth
+
+{'R0': 0, etc} or smth like that
+
+What to do:
+1. convert comp, dest, jump to binary (DONE)
+2. get computer to not just convert to binary (can't be that bad right haha)
+3. keep track of lines but ignore comments (continue loop or smth)
+4. remember how A instructions work
+5. look at zfill

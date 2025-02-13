@@ -120,7 +120,22 @@ def assemble_c_instruction(data):
     # combine
     # c_instr = dest_bin + comp_bin + jump_bin
     
+def assemble_a_instruction(data):
+    # don't think about the exceptions rn
+    # just do @number = number
+    if data.startswith('@'):
+        line = data.split('@')
+        loc = line[1]
+        if loc.isdigit():
+            instr = bin(int(loc))
+            print(instr)
+    pass
 
-assemble_c_instruction('M=D|M;JMP')
+symbol_table  = {'R0': 0, 'R1': 1, 'R2': 2, 'R3': 3, 'R4': 4, 'R5': 5, 
+                 'R6': 6, 'R7': 7, 'R8': 8, 'R9': 9, 'R10': 10, 'R11': 11,
+                 'R12': 12, 'R13': 13, 'R14': 14, 'R15': 15, 'SCREEN': 16384, 'KBD': 24576}
+
+#assemble_c_instruction('M=D|M;JMP')
 # assemble_c_instruction('M=comp')
 # assemble_c_instruction('comp;jump')
+assemble_a_instruction('@5')
