@@ -127,15 +127,34 @@ def assemble_a_instruction(data):
         line = data.split('@')
         loc = line[1]
         if loc.isdigit():
+            # annoying formatting stuff 
             instr = bin(int(loc))
-            print(instr)
+            instr = instr[2:].zfill(15)
+            instr = f'0b{instr}'
+        print(instr)
     pass
 
+# symbol table which we will add to in one of the parses
 symbol_table  = {'R0': 0, 'R1': 1, 'R2': 2, 'R3': 3, 'R4': 4, 'R5': 5, 
                  'R6': 6, 'R7': 7, 'R8': 8, 'R9': 9, 'R10': 10, 'R11': 11,
                  'R12': 12, 'R13': 13, 'R14': 14, 'R15': 15, 'SCREEN': 16384, 'KBD': 24576}
 
+
+line_count = 0
+
+example = 'M=D|M;JMP#@5#@20#0;JMP#//hello' # split by # for now
+
+my_list = example.split('#')
+# print(my_list)
+
+for x in my_list:
+    if x.startswith('//'):
+        continue # comments aren't included in line count
+    else:
+        line_count += 1
+print(line_count)
+
 #assemble_c_instruction('M=D|M;JMP')
 # assemble_c_instruction('M=comp')
 # assemble_c_instruction('comp;jump')
-assemble_a_instruction('@5')
+# assemble_a_instruction('@5')
